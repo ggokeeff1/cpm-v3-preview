@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Care Plan — Redesign</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand-green:#51BF9D; --brand-green-dark:#005D63; --grey:#666D89; --ink:#13384B; --line:#e6eaec; --page:#f4f6f7; --soft-green:rgba(81,191,157,.10); --blue:#1B75BC; --orange:#F68C3D; --carmine:#DA2E72; }
+  *{box-sizing:border-box;}
+  body{ font-family:'Prompt',sans-serif; color:var(--ink); background:var(--page); margin:0; display:flex; flex-direction:column; min-height:100vh; }
+  h1,h2,h3,h4,h5,h6{ font-weight:600; color:var(--ink); }
+
+  .cpm-navbar{ background:var(--ink); padding:.45rem 0; position:relative; z-index:1030; }
+  .cpm-navbar .navbar-brand{ padding:0; margin-right:1.4rem; display:flex; align-items:center; }
+  .cpm-navbar .navbar-toggler{ border:1px solid rgba(255,255,255,.25); color:#fff; padding:.35rem .6rem; }
+  .cpm-navbar .navbar-toggler:focus{ box-shadow:none; }
+  .cpm-navbar .nav-link{ color:rgba(255,255,255,.85)!important; font-weight:500; font-size:.92rem; padding:.5rem .8rem!important; border-radius:8px; display:flex; align-items:center; }
+  .cpm-navbar .nav-link:hover{ color:#fff!important; background:rgba(255,255,255,.08); }
+  .cpm-dropdown{ border:1px solid var(--line); border-radius:10px; padding:.35rem; box-shadow:0 12px 32px rgba(19,56,75,.18); min-width:224px; margin-top:.4rem; }
+  .cpm-dropdown .dropdown-item{ border-radius:7px; padding:.5rem .7rem; display:flex; align-items:center; gap:.65rem; color:var(--ink); font-size:.9rem; }
+  .cpm-dropdown .dropdown-item i{ color:var(--brand-green-dark); width:18px; text-align:center; }
+  .cpm-dropdown .dropdown-item:hover{ background:var(--soft-green); color:var(--brand-green-dark); }
+  .cpm-dropdown .dropdown-item.active,.cpm-dropdown .dropdown-item:active{ background:var(--soft-green); color:var(--brand-green-dark); }
+  .cpm-navbar .avatar{ width:30px; height:30px; border-radius:50%; background:var(--brand-green); color:#fff; display:grid; place-items:center; font-size:.74rem; font-weight:700; flex:none; }
+  .cpm-navbar .dropdown-toggle::after{ margin-left:.45rem; opacity:.55; }
+
+  .crumb{ padding:.9rem 0 .2rem; }
+  .crumb a{ color:var(--grey); text-decoration:none; font-size:.86rem; font-weight:500; display:inline-flex; align-items:center; gap:.4rem; }
+  .crumb a:hover{ color:var(--brand-green-dark); }
+
+  /* client context header (same family as profile) */
+  .client-header{ background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(19,56,75,.05); margin-top:.3rem; }
+  .ch-main{ display:flex; align-items:center; gap:1rem; flex-wrap:wrap; padding:1rem 1.2rem; }
+  .ch-avatar{ width:54px; height:54px; border-radius:14px; background:linear-gradient(135deg,var(--brand-green),var(--brand-green-dark)); color:#fff; display:grid; place-items:center; font-size:1.2rem; font-weight:700; flex:none; }
+  .ch-id h1{ font-size:1.35rem; margin:0; line-height:1.15; }
+  .ch-meta{ display:flex; flex-wrap:wrap; gap:.3rem .9rem; color:var(--grey); font-size:.86rem; margin-top:.2rem; }
+  .ch-meta b{ color:var(--ink); font-weight:600; }
+  .ch-actions{ margin-left:auto; display:flex; align-items:center; gap:.6rem; }
+  .badges-row{ display:flex; flex-wrap:wrap; gap:.5rem; padding:0 1.2rem 1rem; }
+  .sbadge{ display:inline-flex; align-items:center; gap:.4rem; border-radius:20px; padding:.28rem .7rem; font-size:.8rem; font-weight:600; }
+  .sb-green{ background:var(--soft-green); color:var(--brand-green-dark); }
+  .sb-amber{ background:rgba(246,140,61,.14); color:#b6650f; }
+  .sb-blue{ background:rgba(27,117,188,.12); color:#1462a0; }
+  .sb-grey{ background:#eef1f2; color:var(--grey); }
+
+  .panel{ background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 2px rgba(19,56,75,.04); }
+  .panel + .panel{ margin-top:1rem; }
+  .panel-head{ padding:.9rem 1.2rem; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .panel-head h2{ font-size:1rem; margin:0; display:flex; align-items:center; gap:.5rem; }
+  .panel-head h2 i{ color:var(--brand-green-dark); }
+  .panel-body{ padding:1.2rem; }
+
+  .btn{ border-radius:9px; font-weight:500; }
+  .btn-brand{ background:var(--brand-green); border-color:var(--brand-green); color:#fff; }
+  .btn-brand:hover{ background:var(--brand-green-dark); border-color:var(--brand-green-dark); color:#fff; }
+  .btn-ghost{ background:#fff; border:1px solid var(--line); color:var(--ink); }
+  .btn-ghost:hover{ background:#f2f5f6; color:var(--ink); }
+  .btn-sm{ font-size:.84rem; padding:.3rem .65rem; }
+
+  .viewas{ display:inline-flex; align-items:center; gap:.3rem; background:#fff; border:1px solid var(--line); border-radius:9px; padding:.25rem; font-size:.8rem; }
+  .viewas > span{ color:var(--grey); font-weight:600; padding:0 .35rem; }
+  .va-btn{ border:none; background:none; font-family:'Prompt'; font-size:.82rem; font-weight:600; color:var(--grey); border-radius:7px; padding:.35rem .8rem; cursor:pointer; }
+  .va-btn.active{ background:var(--soft-green); color:var(--brand-green-dark); }
+
+  /* document rows (view) */
+  .doc-item{ display:flex; align-items:center; gap:1rem; padding:1rem 1.2rem; border-bottom:1px solid var(--line); }
+  .doc-item:last-child{ border-bottom:none; }
+  .doc-item:hover{ background:#f8fbfa; }
+  .doc-fi{ width:46px; height:46px; border-radius:11px; background:var(--soft-green); color:var(--brand-green-dark); display:grid; place-items:center; font-size:1.25rem; flex:none; }
+  .doc-info{ min-width:0; flex:1; }
+  .doc-name{ font-weight:600; }
+  .doc-sub{ font-size:.82rem; color:var(--grey); margin-top:.1rem; }
+  .doc-acts{ display:flex; gap:.4rem; flex-wrap:wrap; }
+  .pill{ display:inline-flex; align-items:center; gap:.35rem; border-radius:20px; padding:.18rem .6rem; font-size:.74rem; font-weight:700; white-space:nowrap; }
+
+  /* edit: markdown editor */
+  .md-toolbar{ display:flex; gap:.2rem; flex-wrap:wrap; padding:.5rem .7rem; border-bottom:1px solid var(--line); background:#fbfcfc; }
+  .md-toolbar button{ border:1px solid transparent; background:none; width:32px; height:30px; border-radius:7px; color:var(--grey); cursor:pointer; font-size:.85rem; }
+  .md-toolbar button:hover{ background:#fff; border-color:var(--line); color:var(--ink); }
+  .md-editor{ width:100%; border:none; padding:1rem 1.2rem; font-family:'JetBrains Mono',monospace; font-size:.88rem; line-height:1.6; color:var(--ink); resize:vertical; min-height:420px; }
+  .md-editor:focus{ outline:none; }
+  .md-help{ font-size:.78rem; color:var(--grey); padding:.6rem 1.2rem; border-top:1px solid var(--line); background:#fbfcfc; }
+  .md-help code{ background:#eef1f2; border-radius:4px; padding:.05rem .3rem; color:var(--brand-green-dark); }
+
+  /* approval timeline (vertical) */
+  .flow{ position:relative; padding-left:34px; }
+  .flow::before{ content:""; position:absolute; left:13px; top:6px; bottom:6px; width:2px; background:var(--line); }
+  .step{ position:relative; padding-bottom:1.2rem; }
+  .step:last-child{ padding-bottom:0; }
+  .step .node{ position:absolute; left:-34px; top:0; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:.72rem; background:#fff; border:2px solid var(--line); color:#c2cace; }
+  .step.done .node{ background:var(--brand-green-dark); border-color:var(--brand-green-dark); color:#fff; }
+  .step.current .node{ background:var(--brand-green); border-color:var(--brand-green); color:#fff; box-shadow:0 0 0 4px var(--soft-green); }
+  .step .st-title{ font-weight:600; font-size:.92rem; }
+  .step.pending .st-title{ color:var(--grey); }
+  .step .st-time{ font-size:.78rem; color:var(--grey); margin-top:.1rem; }
+
+  .recip{ display:flex; align-items:center; gap:.7rem; border:1px solid var(--line); border-radius:11px; padding:.8rem; margin-bottom:.7rem; }
+  .recip .ic{ width:36px; height:36px; border-radius:9px; background:var(--soft-green); color:var(--brand-green-dark); display:grid; place-items:center; flex:none; }
+  .recip .t{ font-weight:600; font-size:.9rem; } .recip .s{ font-size:.8rem; color:var(--grey); }
+  .recip .chk{ margin-left:auto; }
+
+  .variant{ display:none; } .variant.show{ display:block; }
+
+  .site-footer{ background:var(--ink); color:rgba(255,255,255,.7); border-top:3px solid var(--brand-green); margin-top:auto; }
+  .site-footer .footer-inner{ display:flex; flex-wrap:wrap; gap:2rem 3rem; justify-content:space-between; padding:2.4rem 0 1.6rem; }
+  .site-footer .footer-brand{ max-width:320px; } .site-footer .footer-brand img{ height:64px; width:auto; }
+  .site-footer .footer-brand p{ margin:.8rem 0 0; font-size:.85rem; line-height:1.5; color:rgba(255,255,255,.6); }
+  .site-footer .footer-col h6{ color:#fff; font-size:.74rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin:0 0 1rem; }
+  .site-footer .footer-links{ display:flex; flex-direction:column; gap:.7rem; }
+  .site-footer .footer-links a{ color:rgba(255,255,255,.7); text-decoration:none; font-size:.88rem; display:inline-flex; align-items:center; gap:.55rem; width:fit-content; }
+  .site-footer .footer-links a i{ color:var(--brand-green); font-size:.82rem; width:16px; text-align:center; }
+  .site-footer .footer-bar{ border-top:1px solid rgba(255,255,255,.1); display:flex; flex-wrap:wrap; gap:.6rem 1.5rem; align-items:center; justify-content:space-between; padding:1.1rem 0; font-size:.82rem; color:rgba(255,255,255,.55); }
+  .site-footer .footer-bar .chip-v{ background:rgba(81,191,157,.16); color:#7fd9c0; border-radius:6px; padding:.12rem .5rem; font-weight:600; font-size:.76rem; }
+</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg cpm-navbar">
+  <div class="container-xxl">
+    <a class="navbar-brand" href="care_plan_search_V3.html"><img src="assets/logos/ALWAYS_logo_horiz_RGB_NEG.svg" alt="Allwayswithyou" style="height:46px;width:auto;"></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#cpmNav"><i class="fas fa-bars"></i></button>
+    <div class="collapse navbar-collapse" id="cpmNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-users me-2"></i>Clients</a>
+          <ul class="dropdown-menu cpm-dropdown">
+            <li><a class="dropdown-item" href="onboarding_V3.html"><i class="fas fa-user-plus"></i> Add New Client</a></li>
+            <li><a class="dropdown-item" href="care_plan_search_V3.html"><i class="fas fa-folder-open"></i> Care Plan Manager</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="report_pages_V3.html"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="settings_V3.html"><i class="fas fa-gear me-2"></i>Settings</a></li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><span class="avatar me-2">GO</span> Ger O'Keeffe</a>
+          <ul class="dropdown-menu dropdown-menu-end cpm-dropdown">
+            <li><a class="dropdown-item" href="user_profile_V3.html"><i class="fas fa-id-badge"></i> My Profile &amp; Access</a></li>
+            <li><a class="dropdown-item" href="release_notes_V3.html"><i class="fas fa-bullhorn"></i> Release Notes</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-xxl" style="padding-bottom:2rem;">
+  <div class="crumb"><a href="care_plan_search_V3.html"><i class="fas fa-arrow-left"></i> Care Plan Manager</a></div>
+
+  <!-- client context -->
+  <div class="client-header">
+    <div class="ch-main">
+      <div class="ch-avatar">CB</div>
+      <div class="ch-id">
+        <h1>Colm Bracken</h1>
+        <div class="ch-meta"><span>ID <b>75433</b></span><span>DOB <b>16/12/1937</b></span><span>Branch <b>Tullamore</b></span></div>
+      </div>
+      <div class="ch-actions">
+        <a href="client_profile_V3.html" class="btn btn-ghost btn-sm"><i class="fas fa-id-card me-1"></i> Client Profile</a>
+        <div class="viewas">
+          <button class="va-btn active" id="vbView" onclick="setView('view')">Documents</button>
+          <button class="va-btn" id="vbEdit" onclick="setView('edit')">Edit &amp; Approval</button>
+        </div>
+      </div>
+    </div>
+    <div class="badges-row">
+      <span class="sbadge sb-green"><i class="fas fa-check-circle"></i> Care Plan Approved · 06/03/2026</span>
+      <span class="sbadge sb-green"><i class="fas fa-file-signature"></i> Fully Signed (Digital)</span>
+    </div>
+  </div>
+
+  <!-- ============ VIEW ============ -->
+  <div class="variant show" data-v="view">
+    <div class="panel mt-3">
+      <div class="panel-head">
+        <h2><i class="fas fa-file-medical"></i> Care plan documents</h2>
+        <a href="#" class="btn btn-ghost btn-sm"><i class="fas fa-upload me-1"></i> Upload document</a>
+      </div>
+      <div>
+        <div class="doc-item">
+          <div class="doc-fi"><i class="fas fa-file-lines"></i></div>
+          <div class="doc-info">
+            <div class="doc-name">Care Plan v2 — Final</div>
+            <div class="doc-sub">Markdown · 1.2 MB · uploaded 06/03/2026 by Ger O'Keeffe · Care plan date 06/03/2026</div>
+          </div>
+          <span class="pill sb-green"><i class="fas fa-lock"></i> FULLY APPROVED</span>
+          <div class="doc-acts">
+            <a href="#" class="btn btn-ghost btn-sm"><i class="fas fa-file-pdf me-1"></i> PDF</a>
+            <a href="#" class="btn btn-ghost btn-sm"><i class="fas fa-eye me-1"></i> View</a>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-fi"><i class="fas fa-file-lines"></i></div>
+          <div class="doc-info">
+            <div class="doc-name">Care Plan v1 — Draft</div>
+            <div class="doc-sub">Markdown · 1.0 MB · uploaded 01/03/2026 by Ger O'Keeffe</div>
+          </div>
+          <span class="pill sb-amber"><i class="fas fa-pen"></i> UNDER REVIEW</span>
+          <div class="doc-acts">
+            <a href="#" class="btn btn-brand btn-sm" onclick="setView('edit');return false;"><i class="fas fa-edit me-1"></i> Edit &amp; Approval</a>
+            <a href="#" class="btn btn-ghost btn-sm"><i class="fas fa-file-pdf me-1"></i> PDF</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ EDIT ============ -->
+  <div class="variant" data-v="edit">
+    <div class="row g-3 mt-0">
+      <!-- editor -->
+      <div class="col-lg-7">
+        <div class="panel">
+          <div class="panel-head">
+            <h2><i class="fas fa-file-alt"></i> Document content</h2>
+            <span class="sbadge sb-amber"><i class="fas fa-pen"></i> Under review · v1</span>
+          </div>
+          <div class="md-toolbar">
+            <button type="button" title="Heading" onclick="mdWrap('## ','')"><i class="fas fa-heading"></i></button>
+            <button type="button" title="Bold" onclick="mdWrap('**','**')"><i class="fas fa-bold"></i></button>
+            <button type="button" title="Italic" onclick="mdWrap('*','*')"><i class="fas fa-italic"></i></button>
+            <button type="button" title="List" onclick="mdWrap('- ','')"><i class="fas fa-list-ul"></i></button>
+            <button type="button" title="Link" onclick="mdWrap('[','](url)')"><i class="fas fa-link"></i></button>
+          </div>
+          <textarea class="md-editor" name="content"># Care Plan — Colm Bracken
+
+## Personal Care
+- Assistance with washing and dressing each morning
+- Medication prompting at 8:00 and 18:00
+
+## Mobility
+- Support with transfers; falls-risk precautions in place
+- Clear walkways, grab rails fitted
+
+## Nutrition
+- Meal preparation for lunch and evening meal
+- Monitor fluid intake</textarea>
+          <div class="md-help">Markdown: <code>**bold**</code> <code>*italic*</code> <code># Heading</code> <code>## Subheading</code> <code>- List item</code></div>
+          <div class="panel-body" style="border-top:1px solid var(--line);">
+            <label class="form-label" style="font-size:.8rem;font-weight:500;">Edit notes (optional)</label>
+            <input class="form-control mb-3" style="border-color:var(--line);border-radius:9px;" placeholder="Brief description of changes made…">
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-brand"><i class="fas fa-code-branch me-1"></i> Save new version</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- approval flow -->
+      <div class="col-lg-5">
+        <div class="panel">
+          <div class="panel-head"><h2><i class="fas fa-signature"></i> Signoff &amp; approval flow</h2></div>
+          <div class="panel-body">
+            <!-- recipients -->
+            <h6 style="font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;color:var(--grey);font-weight:600;">Digital signature recipients</h6>
+            <div class="recip">
+              <div class="ic"><i class="fas fa-user-nurse"></i></div>
+              <div><div class="t">Ger O'Keeffe <span class="text-muted">· Assessor</span></div><div class="s">ger.okeeffe@allwayswithyou.ie</div></div>
+              <span class="pill sb-green chk"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="recip">
+              <div class="ic"><i class="fas fa-user"></i></div>
+              <div><div class="t">Mary Bracken <span class="text-muted">· Client/NOK</span></div><div class="s">mary.bracken@example.ie</div></div>
+              <span class="pill sb-green chk"><i class="fas fa-check"></i></span>
+            </div>
+
+            <h6 class="mt-4" style="font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;color:var(--grey);font-weight:600;">Document status workflow</h6>
+            <div class="flow mt-3">
+              <div class="step done"><div class="node"><i class="fas fa-check"></i></div><div class="st-title">Draft created</div><div class="st-time">01/03/2026 · 10:14 · Ger O'Keeffe</div></div>
+              <div class="step done"><div class="node"><i class="fas fa-check"></i></div><div class="st-title">Sent for signature</div><div class="st-time">02/03/2026 · 09:00 · digital (PandaDoc)</div></div>
+              <div class="step done"><div class="node"><i class="fas fa-check"></i></div><div class="st-title">Assessor signed</div><div class="st-time">03/03/2026 · 11:15 · Ger O'Keeffe</div></div>
+              <div class="step current"><div class="node"><i class="fas fa-arrow-right"></i></div><div class="st-title">Awaiting client signature</div><div class="st-time">Started 03/03/2026 · reminder sent</div></div>
+              <div class="step pending"><div class="node">5</div><div class="st-title">Fully approved</div><div class="st-time">Pending</div></div>
+            </div>
+
+            <h6 class="mt-4" style="font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;color:var(--grey);font-weight:600;">Send for signature</h6>
+            <div class="mt-2">
+              <button class="btn btn-brand w-100"><i class="fas fa-envelope-open-text me-1"></i> Send Care Plan for Digital Signatures</button>
+              <div class="text-center my-2"><small class="text-muted">— or —</small></div>
+              <button class="btn btn-ghost w-100"><i class="fas fa-pen me-1"></i> Use Manual Signature (Print &amp; Sign)</button>
+              <small class="text-muted d-block text-center mt-1">Download PDF, collect physical signatures, then upload the signed copy.</small>
+            </div>
+
+            <!-- email-validation guard (shown when required emails are missing) -->
+            <div class="mt-3" id="emailWarn" style="display:none;">
+              <div style="background:rgba(246,140,61,.12);border:1px solid rgba(246,140,61,.4);border-radius:10px;padding:.7rem .9rem;font-size:.84rem;color:#b6650f;">
+                <i class="fas fa-triangle-exclamation me-1"></i> <strong>Missing required email addresses:</strong>
+                <ul class="mb-0 mt-1" style="padding-left:1.1rem;">
+                  <li>Assessor email is not set in the intake record</li>
+                  <li>Client or nominated person email is not set in the client profile</li>
+                </ul>
+                <a href="client_profile_V3.html" class="btn btn-ghost btn-sm mt-2"><i class="fas fa-id-card me-1"></i> Update profile / intake</a>
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container-xxl">
+    <div class="footer-inner">
+      <div class="footer-brand"><img src="assets/logos/ALWAYS_logo_horiz_RGB_NEG.svg" alt="Allwayswithyou"><p>Transforming Care Plan Management for Healthcare Excellence</p></div>
+      <div class="footer-col"><h6>Legal</h6><div class="footer-links">
+        <a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
+        <a href="#"><i class="fas fa-file-contract"></i> Terms &amp; Conditions</a>
+        <a href="#"><i class="fas fa-cookie-bite"></i> Cookie Policy</a>
+        <a href="#"><i class="fas fa-building"></i> Company Information</a>
+      </div></div>
+    </div>
+    <div class="footer-bar"><span>&copy; 2026 Allwayswithyou. All rights reserved.</span><span>Care Plan Manager <span class="chip-v">v2.4.1</span></span></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function mdWrap(pre, post){
+    const ta = document.querySelector('.md-editor'); if(!ta) return;
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    const sel = ta.value.slice(s,e);
+    ta.value = ta.value.slice(0,s) + pre + sel + post + ta.value.slice(e);
+    ta.focus();
+    ta.selectionStart = s + pre.length; ta.selectionEnd = e + pre.length;
+  }
+  function setView(v){
+    document.getElementById('vbView').classList.toggle('active', v==='view');
+    document.getElementById('vbEdit').classList.toggle('active', v==='edit');
+    document.querySelectorAll('.variant').forEach(x=>x.classList.toggle('show', x.dataset.v===v));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function toggleEmailGuard(){
+    const warn=document.getElementById('emailWarn');
+    const missing = warn.style.display==='none';
+    warn.style.display = missing ? 'block':'none';
+    // when missing, disable the digital-send button (mirrors production guard)
+    const digBtn = document.querySelector('#emailWarn').parentElement.querySelector('.btn-brand');
+    if(digBtn){ digBtn.disabled = missing; digBtn.style.opacity = missing? .5:1; digBtn.title = missing? 'Required emails missing':''; }
+  }
+</script>
+</body>
+</html>
